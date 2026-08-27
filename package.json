@@ -1,0 +1,12 @@
+{
+  "name": "sklad-app",
+  "version": "1.0.0",
+  "description": "To'liq ishlaydigan sklad (ombor) boshqaruv dasturi: ro'yxatdan o'tish, kirim/chiqim tarixi, oylik hisobot, monitoring paneli va shtrix-kod orqali mahsulot qayerdan kelganini aniqlash. **Backend** va **frontend** alohida papkalarda.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

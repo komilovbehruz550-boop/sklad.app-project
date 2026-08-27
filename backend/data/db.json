@@ -1,0 +1,14 @@
+{
+  "users": [],
+  "products": [],
+  "batches": [],
+  "movements": [],
+  "movementBatches": [],
+  "seq": {
+    "users": 1,
+    "products": 1,
+    "batches": 1,
+    "movements": 1,
+    "movementBatches": 1
+  }
+}
