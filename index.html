@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkladPro — Sklad boshqaruv tizimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ============ AUTH EKRANI ============ -->
+<div id="auth-screen" class="auth-wrap">
+  <div class="auth-card">
+    <div class="brand">
+      <div class="brand-mark"><span>Sklad</span><span class="brand-mark-b">Pro</span></div>
+      <div class="barcode-strip" aria-hidden="true"></div>
+      <p class="brand-tag">Ombor kirim-chiqim va monitoring tizimi</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Kirish</button>
+      <button class="auth-tab" data-tab="register">Ro'yxatdan o'tish</button>
+    </div>
+
+    <form id="login-form" class="auth-form">
+      <label>Login
+        <input type="text" id="login-username" required autocomplete="username" placeholder="masalan: admin" />
+      </label>
+      <label>Parol
+        <input type="password" id="login-password" required autocomplete="current-password" placeholder="••••••" />
+      </label>
+      <div class="form-error" id="login-error"></div>
+      <button type="submit" class="btn btn-primary btn-block">Tizimga kirish</button>
+    </form>
+
+    <form id="register-form" class="auth-form hidden">
+      <label>To'liq ism
+        <input type="text" id="reg-fullname" placeholder="Ism Familiya" />
+      </label>
+      <label>Korxona / Sklad nomi
+        <input type="text" id="reg-company" placeholder="masalan: \"Bahor Savdo\" MChJ" />
+      </label>
+      <label>Login
+        <input type="text" id="reg-username" required placeholder="login o'ylab toping" />
+      </label>
+      <label>Parol
+        <input type="password" id="reg-password" required placeholder="kamida 4 ta belgi" />
+      </label>
+      <div class="form-error" id="register-error"></div>
+      <button type="submit" class="btn btn-primary btn-block">Ro'yxatdan o'tish</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ ASOSIY DASTUR ============ -->
+<div id="app-screen" class="app-wrap hidden">
+  <aside class="sidebar">
+    <div class="brand-mini">
+      <div class="brand-mark small"><span>Sklad</span><span class="brand-mark-b">Pro</span></div>
+      <div class="barcode-strip thin" aria-hidden="true"></div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-page="dashboard">
+        <span class="nav-ic">◧</span> Monitoring
+      </button>
+      <button class="nav-item" data-page="products">
+        <span class="nav-ic">▤</span> Mahsulotlar
+      </button>
+      <button class="nav-item" data-page="kirim">
+        <span class="nav-ic">↓</span> Kirim qilish
+      </button>
+      <button class="nav-item" data-page="chiqim">
+        <span class="nav-ic">↑</span> Chiqim qilish
+      </button>
+      <button class="nav-item" data-page="scan">
+        <span class="nav-ic">▯▮</span> Shtrix-kod skaner
+      </button>
+      <button class="nav-item" data-page="reports">
+        <span class="nav-ic">▥</span> Oylik hisobot
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div>
+          <div class="user-name" id="user-name">—</div>
+          <div class="user-company" id="user-company">—</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-block" id="logout-btn">Chiqish</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <h1 id="page-title">Monitoring</h1>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topbar-date"></div>
+        <button class="btn btn-ghost btn-small mobile-only" id="logout-btn-mobile" title="Chiqish">⏻</button>
+      </div>
+    </header>
+
+    <!-- ---------- DASHBOARD / MONITORING ---------- -->
+    <section class="page active" id="page-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Jami mahsulot turi</div>
+          <div class="stat-value" id="stat-products">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Jami partiyalar</div>
+          <div class="stat-value" id="stat-batches">0</div>
+        </div>
+        <div class="stat-card accent-in">
+          <div class="stat-label">Shu oy kirim (dona)</div>
+          <div class="stat-value" id="stat-kirim">0</div>
+        </div>
+        <div class="stat-card accent-out">
+          <div class="stat-label">Shu oy chiqim (dona)</div>
+          <div class="stat-value" id="stat-chiqim">0</div>
+        </div>
+      </div>
+
+      <div class="panel-row">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Kam qolgan mahsulotlar</h2>
+            <span class="panel-sub">Minimal chegaradan past</span>
+          </div>
+          <div id="low-stock-list" class="list-simple"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>So'nggi harakatlar</h2>
+            <span class="panel-sub">Oxirgi 15 ta yozuv</span>
+          </div>
+          <div id="recent-moves-list" class="list-simple"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- MAHSULOTLAR ---------- -->
+    <section class="page" id="page-products">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Yangi mahsulot qo'shish</h2>
+        </div>
+        <form id="product-form" class="inline-form">
+          <input type="text" id="p-name" placeholder="Mahsulot nomi *" required />
+          <input type="text" id="p-category" placeholder="Kategoriya" />
+          <input type="text" id="p-unit" placeholder="O'lchov birligi (dona)" value="dona" />
+          <input type="number" id="p-items-per-box" placeholder="1 karobkada nechta dona" min="1" value="1" />
+          <input type="number" id="p-price" placeholder="Narxi" min="0" />
+          <input type="number" id="p-min-stock" placeholder="Minimal qoldiq" min="0" value="0" />
+          <div class="barcode-input-row">
+            <input type="text" id="p-barcode" placeholder="Shtrix-kod (ixtiyoriy)" />
+            <button type="button" class="btn btn-ghost scan-cam-btn" data-scan-target="p-barcode" title="Kamera bilan skanerlash">📷</button>
+          </div>
+          <button type="submit" class="btn btn-primary">Qo'shish</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Mahsulotlar ro'yxati</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nomi</th><th>Kategoriya</th><th>Karobkada</th><th>Qoldiq (dona)</th><th>To'liq karobka</th><th>Min.</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- KIRIM ---------- -->
+    <section class="page" id="page-kirim">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Ombordan kirim qilish</h2>
+          <span class="panel-sub">Har bir kirim uchun avtomatik shtrix-kod yaratiladi</span>
+        </div>
+        <form id="kirim-form" class="inline-form">
+          <select id="k-product" required></select>
+          <input type="text" id="k-source" placeholder="Qayerdan / yetkazib beruvchi *" required />
+          <select id="k-unit-type">
+            <option value="karobka">Karobka bilan</option>
+            <option value="dona">To'g'ridan-to'g'ri dona</option>
+          </select>
+          <input type="number" id="k-boxes" placeholder="Nechta karobka" min="1" />
+          <input type="number" id="k-units" placeholder="Nechta dona" min="1" style="display:none" />
+          <input type="number" id="k-items-per-box" placeholder="1 karobkada nechta dona" min="1" />
+          <div class="barcode-input-row">
+            <input type="text" id="k-barcode" placeholder="Shtrix-kod (bo'sh qoldirilsa avtomatik)" />
+            <button type="button" class="btn btn-ghost scan-cam-btn" data-scan-target="k-barcode" title="Kamera bilan skanerlash">📷</button>
+          </div>
+          <input type="text" id="k-note" placeholder="Izoh" />
+          <button type="submit" class="btn btn-primary">Kirim qilish</button>
+        </form>
+        <div class="form-error" id="kirim-error"></div>
+        <div id="kirim-result" class="result-box hidden"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Partiyalar (kirim tarixi)</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Sana</th><th>Mahsulot</th><th>Qayerdan</th><th>Shtrix-kod</th><th>Bor karobka</th><th>Bor dona</th><th></th></tr>
+            </thead>
+            <tbody id="batches-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- CHIQIM ---------- -->
+    <section class="page" id="page-chiqim">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Ombordan chiqim qilish</h2>
+          <span class="panel-sub">Eng eski partiyadan avtomatik (FIFO) yechiladi</span>
+        </div>
+        <form id="chiqim-form" class="inline-form">
+          <select id="c-product" required></select>
+          <input type="number" id="c-boxes" placeholder="Nechta karobka" min="0" value="0" />
+          <input type="number" id="c-units" placeholder="Nechta dona" min="0" value="0" />
+          <input type="text" id="c-destination" placeholder="Qayerga (do'kon, mijoz...)" />
+          <input type="text" id="c-note" placeholder="Izoh" />
+          <button type="submit" class="btn btn-primary">Chiqim qilish</button>
+        </form>
+        <div class="form-error" id="chiqim-error"></div>
+        <div id="chiqim-result" class="result-box hidden"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Chiqim tarixi</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Sana</th><th>Mahsulot</th><th>Miqdor</th><th>Qayerga</th><th>Izoh</th></tr></thead>
+            <tbody id="chiqim-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- SKANER ---------- -->
+    <section class="page" id="page-scan">
+      <div class="panel scan-panel">
+        <div class="panel-head">
+          <h2>Shtrix-kod orqali qidirish</h2>
+          <span class="panel-sub">Mahsulot qayerdan kelganini aniqlash uchun kodni kiriting yoki skaner bilan o'qiting</span>
+        </div>
+        <form id="scan-form" class="inline-form">
+          <input type="text" id="scan-input" placeholder="Shtrix-kodni kiriting yoki skanerlang..." autofocus />
+          <button type="button" class="btn btn-primary scan-cam-btn" data-scan-target="scan-input" data-scan-autosubmit="scan-form">📷 Kamera bilan skanerlash</button>
+          <button type="submit" class="btn btn-ghost">Qidirish</button>
+        </form>
+        <div id="scan-result" class="scan-result"></div>
+      </div>
+    </section>
+
+    <!-- ---------- HISOBOTLAR ---------- -->
+    <section class="page" id="page-reports">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Oylik kirim-chiqim hisoboti</h2>
+          <span class="panel-sub">Har bir oy va mahsulot bo'yicha jamlangan</span>
+        </div>
+        <div id="reports-container"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- ============ KAMERA BILAN SKANERLASH OYNASI ============ -->
+<div id="barcode-scanner-modal" class="scanner-modal hidden">
+  <div class="scanner-modal-inner">
+    <div class="scanner-modal-head">
+      <h3>Shtrix-kodni kameraga tuting</h3>
+      <button type="button" class="scanner-close" id="scanner-close-btn" aria-label="Yopish">✕</button>
+    </div>
+    <div id="scanner-viewport"></div>
+    <div class="scanner-hint" id="scanner-hint">Kamerani shtrix-kodga qarating, ruxsat so'ralganda "Allow" bosing</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/scanner.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
